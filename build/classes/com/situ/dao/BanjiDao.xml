@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.situ.dao.BanjiDao">
+    <sql id="banjiColums">
+		 b.id,b.name 
+    </sql>
+    <!-- 班级信息的Map -->
+	<resultMap type="Banji" id="BanjiMap">
+		<id column="id" property="id" />
+		<result column="name" property="bname" />
+		<collection property="list" ofType="Coures" >
+			<id column="id" property="cid" />
+			<result column="cname" property="cname" />
+			<result column="teacher" property="teacher"/>
+			<result column="credit" property="credit" />
+		</collection>
+	</resultMap>
+	  <!-- 查找所有的班级 -->
+	  <select id="findAll" resultType="Banji">
+	  	SELECT * FROM banji;
+	  </select>
+	  <!-- 查询班级数量 -->
+	  <select id="totalSize" resultType="int">
+	  	SELECT COUNT(*) FROM banji;
+	  </select>
+	  <!-- 查询班级并进行分页 --> 
+	  <select id="pageList" parameterType="int" resultMap="BanjiMap">
+	  	SELECT b.id,b.name,c.id,c.name as cname,c.credit,IFNULL(COUNT(s.id),0)  AS 'totalPersonNum'
+		FROM banji AS b LEFT JOIN student AS s ON b.id=s.banji_id 
+		LEFT JOIN coures AS c ON c.id=b.id
+		GROUP BY b.id
+		LIMIT #{pageIndex},#{pageSize};
+	  </select>
+	  <!-- 获得班级里面的总人数  -->
+	  <select id="getBanjiPersonNum" resultType="Banji">
+		SELECT b.id,b.name, IFNULL(COUNT(s.id),0) AS 'totalPersonNum'
+		FROM banji AS b LEFT JOIN student AS s ON b.id=s.banji_id GROUP BY b.id;
+	  </select>
+	  <!-- 根据条件获得班级的数量 -->
+	  <select id="totalSizeCondition" parameterType="SearchCondition" resultType="int" >
+		  SELECT COUNT(*) FROM banji
+		  <where>
+			  	<if test="name!=null and !&quot;&quot;.equals(name.trim())">
+			  	  and name like '%${name}%'
+			  	</if>
+		  </where>
+	  </select>
+	  <!-- 根据条件对班级进行分页 -->
+	  <select id="pageListByCondition" parameterType="SearchCondition" resultMap="BanjiMap">
+		SELECT b.id,b.name,c.id,c.name as cname,c.credit,IFNULL(COUNT(s.id),0)  AS 'totalPersonNum'
+		FROM banji AS b LEFT JOIN student AS s ON b.id=s.banji_id 
+		LEFT JOIN coures AS c ON c.id=b.id
+		<where>
+			<if test=" banji!=null and banji.bname!=null  and !&quot;&quot;.equals(banji.bname.trim())">
+			
+			  	  and b.name like '%${banji.bname}%'
+			 </if>
+			<if test=" coures!=null and coures.cname!=null  and !&quot;&quot;.equals(coures.cname.trim())">
+			  	  and c.name like '%${coures.cname}%'
+			 </if>
+		</where>
+		GROUP BY b.id
+		LIMIT #{pageIndex},#{pageSize};
+	  </select>
+	  <!-- 添加班级 -->
+	  <insert id="addBanji" parameterType="Banji">
+	  	INSERT INTO banji (NAME) VALUES (#{name});
+	  </insert>
+	  <!-- 修改  -->
+	  <update id="update" parameterType="Banji">
+    	UPDATE banji SET name=#{bname} where id=#{id}
+	  </update>
+	  <!-- 根据id查找班级 -->
+	    <select id="findById" parameterType="int" resultType="Banji" >
+	    	SELECT id,name FROM banji WHERE id=#{id};
+	    </select>
+	  <!-- 根据id删除班级 -->
+    <delete id="deleteById" parameterType="int">
+    	DELETE FROM banji WHERE id=#{id};
+    </delete>
+  </mapper>

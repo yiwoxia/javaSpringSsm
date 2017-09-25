@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.situ.dao.CourseDao">
+  	<sql id="courseColums">
+  	c.id as cid ,c.name as cname,teacher,credit,b.id,b.name
+  	</sql>
+  	<!-- 查询课程map -->
+  	<resultMap type="Coures" id="CouresMap">
+  		<id column="id" property="cid"/>	
+  		<result column="name" property="cname"/>
+  		<result column="teacher" property="teacher"/>
+  		<result column="credit" property="credit"/>
+  		<collection property="list" ofType="Banji">
+  			<id column="id" property="id"/>
+  			<result column="bname" property="name"/>
+  		</collection>
+  	</resultMap>
+  	<!-- 查询班级数量 -->
+  	<select id="totalSize" resultType="int">
+  		SELECT COUNT(*) FROM coures;
+  	</select>
+  	<!-- 查询班级分页但没有条件 -->
+  	<select id="pageList" parameterType="int" resultMap="CouresMap" >
+  		SELECT c.id ,c.name,teacher,credit,b.id,b.name as bname
+  		FROM coures AS c LEFT JOIN banji_coures AS bc ON  bc.coures_id=c.id  
+  		LEFT JOIN banji AS b ON bc.banji_id=b.id GROUP BY c.id
+  		LIMIT #{pageIndex},#{pageSize};
+  	</select>
+  	<!-- 查询分页有条件 -->
+  	<select id="pageListByCondition" parameterType="SearchCondition" resultMap="CouresMap">
+  		SELECT c.id ,c.name,teacher,credit,b.id,b.name AS bname
+  		FROM coures AS c LEFT JOIN banji_coures AS bc ON  bc.coures_id=c.id  
+  		LEFT JOIN banji AS b ON bc.banji_id=b.id
+		<where>
+			<if test=" coures!=null and coures.cname!=null  and !&quot;&quot;.equals(coures.cname.trim())">
+				and c.name like '%${coures.cname}%'
+			</if>
+			<if test=" coures!=null and coures.teacher!=null  and !&quot;&quot;.equals(coures.teacher.trim())">
+				and c.teacher like '%${coures.teacher}%'
+			</if>
+		</where>  
+		GROUP BY c.id
+		LIMIT #{pageIndex},#{pageSize};
+  	</select>
+  			
+	<!-- 根据条件查询符合课程数 -->
+	<select id="toatalSizeByCondition" parameterType="SearchCondition" resultType="int">
+		SELECT COUNT(*) FROM coures as c 
+		<where>
+			<if test=" coures!=null and coures.cname!=null  and !&quot;&quot;.equals(coures.cname.trim())">
+				and c.name like '%${coures.cname}%'
+			</if>
+			<if test=" coures!=null and coures.teacher!=null  and !&quot;&quot;.equals(coures.teacher.trim())">
+				and c.teacher like '%${coures.teacher}%'
+			</if>
+		</where>
+	</select>
+  	<!-- 获得班级数量 -->
+  	<select id="getTotalBanjis" resultType="Coures">
+  		SELECT c.id as cid,c.name,
+  		IFNULL(COUNT(b.id),0) AS 'totalBanjis' FROM coures AS c 
+  		LEFT JOIN banji_coures AS bc ON c.id=bc.coures_id  
+  		LEFT JOIN banji AS b ON bc.banji_id=b.id GROUP BY c.id;
+  	</select>
+  	<!-- 获得课程人数 -->
+  	<select id="getTotalPersons" resultType="Coures">
+  		SELECT c.id as cid,c.name,IFNULL (COUNT(b.id),0) AS 'totalPersons' FROM coures AS c
+		LEFT JOIN banji_coures AS bc ON c.id=bc.coures_id 
+		LEFT JOIN banji AS b ON bc.banji_id=b.id 
+		LEFT JOIN student AS s ON s.banji_id=c.id
+		GROUP BY c.id;
+  	</select>
+  
+  	<!-- 添加课程 -->
+	<insert id="addCoures" parameterType="Coures" >
+		INSERT INTO coures (id,NAME,teacher) VALUES (#{cid},#{cname},#{teacher});
+	</insert>
+	<!-- 根据id查询课程 -->
+	<select id="findById" parameterType="int" resultType="Coures">
+		SELECT id,NAME,teacher FROM coures WHERE id=#{cid};
+	</select>
+	<!-- 更新课程信息 -->
+	<update id="update" parameterType="Coures">
+		UPDATE coures 
+		<set>
+			<if test="cname!=null  and !&quot;&quot;.equals(cname.trim())">
+				name=#{cname},
+			</if>
+			<if test="teacher!=null  and !&quot;&quot;.equals(teacher.trim())">
+				teacher=#{teacher},
+			</if>
+		</set> 
+		where id=#{cid};
+	</update>
+	<!-- 根据id删除课程 -->
+	<delete id="deleteCourse" parameterType="int" >
+		delete from coures where id=#{cid};
+	</delete>
+  </mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.situ.dao.ManageDao">
+  	
+  	<!-- 根据id删除班级 -->
+  	<delete id="deleteCoures" parameterType="int">
+  		DELETE FROM banji_coures WHERE banji_id =#{id} and coures_id=#{cid};
+  	</delete>
+  	<!-- 查找所有的课程 -->
+  	<select id="findALLCourse" resultType="Coures">
+  		select * from coures;
+  	</select>
+  	<!-- 添加课程表 -->
+  	<insert id="addCoures" parameterType="int">
+  		INSERT INTO banji_coures (banji_id,coures_id) VALUES (#{id},#{cid});
+  	</insert>
+  </mapper>
