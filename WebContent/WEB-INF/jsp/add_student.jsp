@@ -8,7 +8,23 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Insert title here</title>
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath }/lib/bootstrap/css/bootstrap.css" />
-<script type="text/javascript" src="${pageContext.request.contextPath }/lib/bootstrap/js/bootstrap.js"></script>
+<link type="text/javascript" src="${pageContext.request.contextPath }/lib/bootstrap/js/bootstrap.js"/>
+<script type="text/javascript" src="${pageContext.request.contextPath }/lib/jquery/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath }/lib/jquery/jquery.form.js"></script>
+<script type="text/javascript">
+	function uploadPic(){
+		//定义参数
+		var options = {
+				url : "${pageContext.request.contextPath}/upload/uploadPic.action",
+				dataType : "json",
+				type : "post",
+				success : function(data){
+					$("#imgId").attr("src" , "/pic/" + data.fileName);
+				}
+		};
+		$("#form-add").ajaxSubmit(options);
+	}
+</script>
 </head>
 <body>
 	<!-- head begin -->
@@ -31,7 +47,7 @@
 					<li role="presentation" class="active"><a href="${pageContext.request.contextPath }/student/toaddStudent.action">添加学生</a></li>
 				</ul>
 				<!-- 添加学生 开始 -->
-				<form style="margin-top: 10px;" action="${pageContext.request.contextPath }/student/addStudent.action" method="post" >
+				<form style="margin-top: 10px;" action="${pageContext.request.contextPath }/student/addStudent.action" method="post" enctype="multipart/form-data" id="form-add">
 				<div class="form-group">
 					   <label for="exampleInputEmail1">学号</label>
 					   <input type="text" name="id" class="form-control" id="exampleInputEmail1" placeholder="学号">
@@ -67,11 +83,18 @@
 						</select>
 				 	</div>
 				  
+
+				       <div class="form-group">
+				       		<label>上传头像</label>
+				           <img alt="" id="imgId" src="" width=100 height=100>
+				           <input type="hidden" name="pictureFile" id="mainImage"/>
+				           <input type="file" name="pictureFile" onchange="uploadPic();"/>
+				       </div>
 				  
 				  <button type="submit" class="btn btn-primary">Submit</button>
 				</form>
 				<!-- 添加学生 结束 -->
-			</div>
+			</div> 
 			<!-- 右边栏结束  -->
 		</div>
 	</div>
